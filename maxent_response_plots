@@ -1,0 +1,21 @@
+#this script was used to make better looking plots out of the maxent response curve results
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+
+data <- read.csv("prec 2100_5 response curves .csv")
+
+data.long <- pivot_longer(data, cols = -Prec, names_to = "Species", values_to = "Response")
+
+ggplot(data.long, aes(x = Prec, y = Response, color = Species)) +
+  geom_line(size = 2, linetype = "solid") +
+  labs(x = "Monthly Total Precipitation (mm)", y = "Habitat Suitability", color = "Species") +
+  scale_color_manual(values = c("#003f5c", "#374c80", "#7a5195", "#bc5090", "#ef5675", "#ff764a", "#ffa600")) +
+  coord_cartesian(xlim = c(40,170), ylim = c(0, 1)) +
+    theme_bw(base_line_size = 20, base_rect_size = 2) +
+theme(plot.title = element_text(size = 16, face = "bold"),
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 12, colour = "black", margin = 5), element_line(colour = "black",linewidth = 3, linetype = 1),
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10, face = "italic"),
+      panel.grid = element_blank(),)
