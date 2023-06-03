@@ -1,0 +1,271 @@
+#this is the script used to generate habitat suitability maps as well as response curves using machuruku for the genus Codringtonia
+
+
+library(machuruku)
+library(raster)
+library(ape)
+library(treeio)
+library(ggplot2)
+
+
+
+#current climate
+bio1= raster("Current/bio_1.tif")
+bio4= raster("Current/bio_4.tif")
+bio8= raster("Current/bio_8.tif")
+bio9= raster("Current/bio_9.tif")
+bio10= raster("Current/bio_10.tif")
+bio11= raster("Current/bio_11.tif")
+bio12= raster("Current/bio_12.tif")
+bio13= raster("Current/bio_13.tif")
+bio14= raster("Current/bio_14.tif")
+bio15= raster("Current/bio_15.tif")
+bio16= raster("Current/bio_16.tif")
+bio17= raster("Current/bio_17.tif")
+bio18= raster("Current/bio_18.tif")
+bio19= raster("Current/bio_19.tif")
+
+#pliocene M2 climate
+bio1m2= raster("Pliocene_M2/bio_1.tif")
+bio4m2= raster("Pliocene_M2/bio_4.tif")
+bio8m2= raster("Pliocene_M2/bio_8.tif")
+bio9m2= raster("Pliocene_M2/bio_9.tif")
+bio10m2= raster("Pliocene_M2/bio_10.tif")
+bio11m2= raster("Pliocene_M2/bio_11.tif")
+bio12m2= raster("Pliocene_M2/bio_12.tif")
+bio13m2= raster("Pliocene_M2/bio_13.tif")
+bio14m2= raster("Pliocene_M2/bio_14.tif")
+bio15m2= raster("Pliocene_M2/bio_15.tif")
+bio16m2= raster("Pliocene_M2/bio_16.tif")
+bio17m2= raster("Pliocene_M2/bio_17.tif")
+bio18m2= raster("Pliocene_M2/bio_18.tif")
+bio19m2= raster("Pliocene_M2/bio_19.tif")
+
+#pliocene mid-warm period climate
+bio1mpwp= raster("Pliocene_mpwp/bio_1.tif")
+bio4mpwp= raster("Pliocene_mpwp/bio_4.tif")
+bio8mpwp= raster("Pliocene_mpwp/bio_8.tif")
+bio9mpwp= raster("Pliocene_mpwp/bio_9.tif")
+bio10mpwp= raster("Pliocene_mpwp/bio_10.tif")
+bio11mpwp= raster("Pliocene_mpwp/bio_11.tif")
+bio12mpwp= raster("Pliocene_mpwp/bio_12.tif")
+bio13mpwp= raster("Pliocene_mpwp/bio_13.tif")
+bio14mpwp= raster("Pliocene_mpwp/bio_14.tif")
+bio15mpwp= raster("Pliocene_mpwp/bio_15.tif")
+bio16mpwp= raster("Pliocene_mpwp/bio_16.tif")
+bio17mpwp= raster("Pliocene_mpwp/bio_17.tif")
+bio18mpwp= raster("Pliocene_mpwp/bio_18.tif")
+bio19mpwp= raster("Pliocene_mpwp/bio_19.tif")
+
+#pleistocene mis19 climate
+bio1mis19= raster("Pleistocene_MIS19/bio_1.tif")
+bio4mis19= raster("Pleistocene_MIS19/bio_4.tif")
+bio8mis19= raster("Pleistocene_MIS19/bio_8.tif")
+bio9mis19= raster("Pleistocene_MIS19/bio_9.tif")
+bio10mis19= raster("Pleistocene_MIS19/bio_10.tif")
+bio11mis19= raster("Pleistocene_MIS19/bio_11.tif")
+bio12mis19= raster("Pleistocene_MIS19/bio_12.tif")
+bio13mis19= raster("Pleistocene_MIS19/bio_13.tif")
+bio14mis19= raster("Pleistocene_MIS19/bio_14.tif")
+bio15mis19= raster("Pleistocene_MIS19/bio_15.tif")
+bio16mis19= raster("Pleistocene_MIS19/bio_16.tif")
+bio17mis19= raster("Pleistocene_MIS19/bio_17.tif")
+bio18mis19= raster("Pleistocene_MIS19/bio_18.tif")
+bio19mis19= raster("Pleistocene_MIS19/bio_19.tif")
+
+#pleistocene last intereglacial climate
+bio1li= raster("Pleistocene_LI/bio_1.tif")
+bio4li= raster("Pleistocene_LI/bio_4.tif")
+bio8li= raster("Pleistocene_LI/bio_8.tif")
+bio9li= raster("Pleistocene_LI/bio_9.tif")
+bio10li= raster("Pleistocene_LI/bio_10.tif")
+bio11li= raster("Pleistocene_LI/bio_11.tif")
+bio12li= raster("Pleistocene_LI/bio_12.tif")
+bio13li= raster("Pleistocene_LI/bio_13.tif")
+bio14li= raster("Pleistocene_LI/bio_14.tif")
+bio15li= raster("Pleistocene_LI/bio_15.tif")
+bio16li= raster("Pleistocene_LI/bio_16.tif")
+bio17li= raster("Pleistocene_LI/bio_17.tif")
+bio18li= raster("Pleistocene_LI/bio_18.tif")
+bio19li= raster("Pleistocene_LI/bio_19.tif")
+
+
+#pleistocene: late-holocene, meghalayan
+bio1lhol= raster("Pleistocene_lHol/bio_1.tif")
+bio4lhol= raster("Pleistocene_lHol/bio_4.tif")
+bio8lhol= raster("Pleistocene_lHol/bio_8.tif")
+bio9lhol= raster("Pleistocene_lHol/bio_9.tif")
+bio10lhol= raster("Pleistocene_lHol/bio_10.tif")
+bio11lhol= raster("Pleistocene_lHol/bio_11.tif")
+bio12lhol= raster("Pleistocene_lHol/bio_12.tif")
+bio13lhol= raster("Pleistocene_lHol/bio_13.tif")
+bio14lhol= raster("Pleistocene_lHol/bio_14.tif")
+bio15lhol= raster("Pleistocene_lHol/bio_15.tif")
+bio16lhol= raster("Pleistocene_lHol/bio_16.tif")
+bio17lhol= raster("Pleistocene_lHol/bio_17.tif")
+bio18lhol= raster("Pleistocene_lHol/bio_18.tif")
+bio19lhol= raster("Pleistocene_lHol/bio_19.tif")
+
+#occurrance data
+occ <- read.delim("Occ_Data_Total.csv", h=T, sep=",")
+
+#tidying up climate variables
+climcur= stack(bio1,bio4,bio8,bio9,bio10,bio11,bio12,bio13,bio14,bio15,bio16,bio17,bio18,bio19)
+climm2= stack(bio1m2,bio4m2,bio8m2,bio9m2,bio10m2,bio11m2,bio12m2,bio13m2,bio14m2,bio15m2,bio16m2,bio17m2,bio18m2,bio19m2)
+climmpwp= stack(bio1mpwp,bio4mpwp,bio8mpwp,bio9mpwp,bio10mpwp,bio11mpwp,bio12mpwp,bio13mpwp,bio14mpwp,bio15mpwp,bio16mpwp,bio17mpwp,bio18mpwp,bio19mpwp)
+climmis19= stack(bio1mis19,bio4mis19,bio8mis19,bio9mis19,bio10mis19,bio11mis19,bio12mis19,bio13mis19,bio14mis19,bio15mis19,bio16mis19,bio17mis19,bio18mis19,bio19mis19)    
+climli= stack(bio1li,bio4li,bio8li,bio9li,bio10li,bio11li,bio12li,bio13li,bio14li,bio15li,bio16li,bio17li,bio18li,bio19li)
+climlhol= stack(bio1lhol,bio4lhol,bio8lhol,bio9lhol,bio10lhol,bio11lhol,bio12lhol,bio13lhol,bio14lhol,bio15lhol,bio16lhol,bio17lhol,bio18lhol,bio19lhol)
+
+#a very important note here is that the command machu.top.env was used to determine the important variables
+climcurimp= stack(bio4,bio9,bio14,bio15,bio18,bio17)
+climm2imp= stack(bio4m2,bio9m2,bio14m2,bio15m2,bio18m2,bio17m2)
+climmpwpimp= stack(bio4mpwp,bio9mpwp,bio14mpwp,bio15mpwp,bio18m2,bio17mpwp)
+climmis19imp= stack(bio4mis19,bio9mis19,bio14mis19,bio15mis19,bio18mis19,bio17mis19)
+climliimp= stack(bio4li,bio9li,bio14li,bio15li,bio18li,bio17li)
+climlholimp= stack(bio4lhol,bio9lhol,bio14lhol,bio15lhol,bio18lhol,bio17lhol)
+
+e.in<- extent(20,25,35,41)
+climcur<-crop(climcur, e.in)
+climm2<- crop(climm2, e.in)
+climmpwp<- crop(climmpwp, e.in)
+climmis19<- crop(climmis19, e.in)
+climli<- crop(climli, e.in)
+climlhol<- crop(climlhol, e.in)
+climcurimp<-crop(climcurimp, e.in)
+climm2imp<-crop(climm2imp, e.in)
+climmpwpimp<-crop(climmpwpimp, e.in)
+climmis19imp<-crop(climmis19imp, e.in)
+climliimp<-crop(climliimp, e.in)
+climlholimp<-crop(climlholimp, e.in)
+
+
+tree2<- read.nexus("Consensus_COMBINED_Cod3genesRatesC_trees.trees")
+# tree import
+tree <- read.nexus("codtree.TREES")  
+
+#rarefying occurrance points
+occ.rarefied <- machu.occ.rarefy(in.pts = occ, rarefy.dist = 1)
+
+#visualize
+library(rworldmap)
+newmap <- getMap(resolution = "low")
+plot(newmap, xlim = c(20, 25), ylim = c(35, 41), asp = 1)
+
+# rarefied occurrence points
+points(occ.rarefied$x, occ.rarefied$y, pch=1, cex = 1.5)
+points(occ$x, occ$y, pch=20)
+
+# construct response table using a reduced dataset of climate variables that are not co-correlated
+response.table <- machu.1.tip.resp(occ.rarefied, climcurimp, verbose=T)
+
+# visualize tree with time-slices to see what we're doing
+machu.treeplot(tree, upperX=1.5, timelabeloffset = 1, timeslice=c(0, 0.0042,0.13, 0.787, 3.205, 3.3), timeslicecolor = "blue", timeslicelinetype = "dashed")
+
+
+
+
+
+
+# part 2 for each time-slice, one with 20 uncertainty bins and one without
+#lhol
+ace.lhol <- machu.2.ace(response.table, tree, T=0.0042)
+ace.lhol.unc <- machu.2.ace(response.table, tree, T=0.0042, n.unc = 20)
+#li
+ace.li <- machu.2.ace(response.table, tree, T=0.13)
+ace.li.unc <- machu.2.ace(response.table, tree, T=0.13, n.unc = 20)
+# mis19
+ace.mis19 <- machu.2.ace(response.table, tree, T=0.785)
+ace.mis19.unc <- machu.2.ace(response.table, tree, T=0.785, n.unc = 20)
+# mpwp
+ace.mpwp <- machu.2.ace(response.table, tree, T=3.264)
+ace.mpwp.unc <- machu.2.ace(response.table, tree, T=3.264, n.unc = 20)
+# M2
+ace.M2 <- machu.2.ace(response.table, tree, T=3.3)
+ace.M2.unc <- machu.2.ace(response.table, tree, T=3.3, n.unc = 20)
+# also run part 2 for all nodes/tips
+ace.all <- machu.2.ace(response.table, tree)
+ace.all.unc <- machu.2.ace(response.table, tree, n.unc = 20)
+
+
+
+
+# run part 3 for each time-slice, one with uncertainty and one without
+# cur
+out.cur <- machu.3.anc.niche(ace.all, climcurimp, taxa = c(1:7), calc.unc = F, resp.curv = T, clip.Q = F, verbose = T)
+out.cur.unc <- machu.3.anc.niche(ace.all.unc, climcurimp, taxa = c(1:7), calc.unc = T, resp.curv = T, clip.Q = F, verbose = T)
+#lhol
+out.lhol <- machu.3.anc.niche(ace.lhol, climlholimp, calc.unc = F, resp.curv=T, clip.Q = F, verbose = T)
+out.lhol.unc <- machu.3.anc.niche(ace.lhol.unc, climlholimp, calc.unc = T, resp.curv=T, clip.Q = F, verbose = T)
+#li
+out.li <- machu.3.anc.niche(ace.li, climliimp, calc.unc = F, resp.curv=T, clip.Q = F, verbose = T)
+out.li.unc <- machu.3.anc.niche(ace.li.unc, climm2imp, calc.unc = T, resp.curv=T, clip.Q = F, verbose = T)
+# mis19
+out.mis19 <- machu.3.anc.niche(ace.mis19, climmis19imp, calc.unc = F, resp.curv=T, clip.Q = F, verbose = T)
+out.mis19.unc <- machu.3.anc.niche(ace.mis19.unc, climmis19imp, calc.unc = T, resp.curv=T, clip.Q = F, verbose = T)
+# mpwp
+out.mpwp <- machu.3.anc.niche(ace.mpwp, climmpwpimp, calc.unc = F, resp.curv=T, clip.Q = F, verbose = T)
+out.mpwp.unc <- machu.3.anc.niche(ace.mpwp.unc, climmpwpimp, calc.unc = T, resp.curv=T, clip.Q = F, verbose = T)
+# M2
+out.M2 <- machu.3.anc.niche(ace.M2, climm2imp, calc.unc = F, resp.curv=T, clip.Q = F, verbose = T)
+out.M2.unc <- machu.3.anc.niche(ace.M2.unc, climm2imp, calc.unc = T, resp.curv=T, clip.Q = F, verbose = T)
+
+
+
+
+
+# plots
+# wo unc
+machu.plotmap(out.cur, col=2,title=F)
+machu.plotmap(out.lhol, col=2, title=F)
+machu.plotmap(out.li, col=2, title=F)
+machu.plotmap(out.mis19, col=2, title=F)
+par(mfrow=c(1,3))
+machu.plotmap(out.mpwp, col=2, title=F)
+machu.plotmap(out.M2, col=2, title=F)
+
+
+# plots
+# wo unc
+machu.plotmap(out.cur, col=2,title=T)
+machu.plotmap(out.lhol, col=2, title=T)
+machu.plotmap(out.li, col=2, title=T)
+machu.plotmap(out.mis19, col=2, title=T)
+par(mfrow=c(1,3))
+machu.plotmap(out.mpwp, col=2, title=T)
+machu.plotmap(out.M2, col=2, title= T)
+
+
+
+
+
+
+
+
+
+
+
+
+#resp
+
+resp <- machu.1.tip.resp(occ.rarefied, climcurimp, verbose = T)
+
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_4", linewidth = 2, comb = T)
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_9", linewidth = 2, comb = T)
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_14", linewidth = 2, comb = T, legend.pos = "topright")
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_15", linewidth = 2, comb = T)
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_18", linewidth = 2, comb = T)
+machu.respplot(resp, taxa = c(1,2,3,4,5,6,7), clim = "bio_17", linewidth = 2, comb = T, legend.pos = "topright")
+
+
+
+
+
+
+
+
+
+
+
+
+
