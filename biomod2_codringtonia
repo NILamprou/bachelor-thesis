@@ -1,0 +1,794 @@
+#species distribution modelling using the package biomod 2 for the genus Codringtonia
+#this script does pretty much everything you can do with the package
+#lack of evaluation dataset is attributed to the small dataset we had to begin with
+
+
+
+
+library(terra)
+library(tidyterra)
+library(biomod2)
+library(raster)
+library(rasterVis)
+library(gridExtra)
+library(reshape2)
+library(dismo)
+library(gbm)
+library(ggplot2)
+
+
+e.in<- extent(20,24,36,39)
+
+#even though all of the data were imported, the modelling process describe in this script refers to only one of the seven species
+occ_eli<- read.csv("eli_thin.csv")
+occ_par<- read.csv("par_thin.csv")
+occ_cod<- read.csv("cod_thin.csv")
+occ_int<- read.csv("int_thin.csv")
+occ_git<- read.csv("git_thin.csv")
+occ_par<- read.csv("par_thin.csv")
+occ_hel<- read.csv("hel_thin.csv")
+occ_euc<- read.csv("euc_thin.csv")
+
+
+
+#current
+prec<- raster("Current/Prec current.tif")
+bio3curr<- raster("Current/bio3.tif")
+bio9curr<- raster("Current/bio9.tif")
+bio12curr<- raster("Current/bio12.tif")
+bio13curr<- raster("Current/bio13.tif")
+bio18curr<- raster("Current/bio18.tif")
+bio19curr<- raster("Current/bio19.tif")
+
+greece<- stack(prec,bio3curr,bio9curr,bio12curr,bio13curr,bio18curr,bio19curr)
+greece<- crop(greece,e.in)
+greece<- stack(greece)
+names(greece)[1] <- "prec"
+names(greece)[2] <- "layer.1"
+names(greece)[3] <- "layer.2"
+names(greece)[4] <- "layer.3"
+names(greece)[5] <- "layer.4"
+names(greece)[6] <- "layer.5"
+names(greece)[7] <- "layer.6"
+#2040
+
+
+prec2040_1<-raster("2040/SSP1/prec.tif") 
+bio3_2040_1<- raster("2040/SSP1/bio3.tif")
+bio9_2040_1<- raster("2040/SSP1/bio9.tif")
+bio12_2040_1<- raster("2040/SSP1/bio12.tif")
+bio13_2040_1<- raster("2040/SSP1/bio13.tif")
+bio18_2040_1<- raster("2040/SSP1/bio18.tif")
+bio19_2040_1<- raster("2040/SSP1/bio19.tif")
+greece_2040_1<- stack(prec2040_1,bio3_2040_1,bio9_2040_1,bio12_2040_1,bio13_2040_1,bio18_2040_1,bio19_2040_1)
+greece_2040_1<- crop(greece_2040_1, e.in)
+greece_2040_1<- stack(greece_2040_1)
+names(greece_2040_1)[1] <- "prec"
+names(greece_2040_1)[2] <- "layer.1"
+names(greece_2040_1)[3] <- "layer.2"
+names(greece_2040_1)[4] <- "layer.3"
+names(greece_2040_1)[5] <- "layer.4"
+names(greece_2040_1)[6] <- "layer.5"
+names(greece_2040_1)[7] <- "layer.6"
+
+
+
+
+prec2040_5<-raster("2040/SSP5/prec.tif") 
+bio3_2040_5<- raster("2040/SSP5/bio3.tif")
+bio9_2040_5<- raster("2040/SSP5/bio9.tif")
+bio12_2040_5<- raster("2040/SSP5/bio12.tif")
+bio13_2040_5<- raster("2040/SSP5/bio13.tif")
+bio18_2040_5<- raster("2040/SSP5/bio18.tif")
+bio19_2040_5<- raster("2040/SSP5/bio19.tif")
+greece_2040_5<- stack(prec2040_5,bio3_2040_5,bio9_2040_5,bio12_2040_5,bio13_2040_5,bio18_2040_5,bio19_2040_5)
+greece_2040_5<- crop(greece_2040_5, e.in)
+greece_2040_5<- stack(greece_2040_5)
+names(greece_2040_5)[1] <- "prec"
+names(greece_2040_5)[2] <- "layer.1"
+names(greece_2040_5)[3] <- "layer.2"
+names(greece_2040_5)[4] <- "layer.3"
+names(greece_2040_5)[5] <- "layer.4"
+names(greece_2040_5)[6] <- "layer.5"
+names(greece_2040_5)[7] <- "layer.6"
+
+
+
+
+#2100
+prec2100_1<-raster("2100/SSP1/prec.tif") 
+bio3_2100_1<- raster("2100/SSP1/bio3.tif")
+bio9_2100_1<- raster("2100/SSP1/bio9.tif")
+bio12_2100_1<- raster("2100/SSP1/bio12.tif")
+bio13_2100_1<- raster("2100/SSP1/bio13.tif")
+bio18_2100_1<- raster("2100/SSP1/bio18.tif")
+bio19_2100_1<- raster("2100/SSP1/bio19.tif")
+greece_2100_1<- stack(prec2100_1,bio3_2100_1,bio9_2100_1,bio12_2100_1,bio13_2100_1,bio18_2100_1,bio19_2100_1)
+greece_2100_1<- crop(greece_2100_1, e.in)
+greece_2100_1<- stack(greece_2100_1)
+names(greece_2100_1)[1] <- "prec"
+names(greece_2100_1)[2] <- "layer.1"
+names(greece_2100_1)[3] <- "layer.2"
+names(greece_2100_1)[4] <- "layer.3"
+names(greece_2100_1)[5] <- "layer.4"
+names(greece_2100_1)[6] <- "layer.5"
+names(greece_2100_1)[7] <- "layer.6"
+
+
+
+
+
+
+prec2100_5<-raster("2100/SSP5/prec.tif") 
+bio3_2100_5<- raster("2100/SSP5/bio3.tif")
+bio9_2100_5<- raster("2100/SSP5/bio9.tif")
+bio12_2100_5<- raster("2100/SSP5/bio12.tif")
+bio13_2100_5<- raster("2100/SSP5/bio13.tif")
+bio18_2100_5<- raster("2100/SSP5/bio18.tif")
+bio19_2100_5<- raster("2100/SSP5/bio19.tif")
+greece_2100_5<- stack(prec2100_5,bio3_2100_5,bio9_2100_5,bio12_2100_5,bio13_2100_5,bio18_2100_5,bio19_2100_5)
+greece_2100_5<- crop(greece_2100_5, e.in)
+greece_2100_5<- stack(greece_2100_5)
+names(greece_2100_5)[1] <- "prec"
+names(greece_2100_5)[2] <- "layer.1"
+names(greece_2100_5)[3] <- "layer.2"
+names(greece_2100_5)[4] <- "layer.3"
+names(greece_2100_5)[5] <- "layer.4"
+names(greece_2100_5)[6] <- "layer.5"
+names(greece_2100_5)[7] <- "layer.6"
+
+
+
+
+
+
+#formatting data
+#name
+myRespName<- 'C.eucineta'
+myResp<- as.numeric(unlist(occ_euc[myRespName]))
+#coordinates
+myRespXY<- occ_euc[c("x","y")]
+
+
+
+mybiomoddata<-  BIOMOD_FormatingData(
+  myRespName,
+  myResp,
+  greece,
+  dir.name = ".",
+  myRespXY,
+  eval.resp.var = NULL,
+  eval.expl.var = NULL,
+  eval.resp.xy = NULL,
+  PA.nb.rep = 10,
+  PA.nb.absences = 100,
+  PA.strategy = "random",
+  PA.dist.min = 0,
+  PA.dist.max = NULL,
+  PA.sre.quant = 0,
+  PA.user.table = NULL,
+  na.rm = TRUE,
+  filter.raster = TRUE
+)
+
+#cross validation
+
+
+mybiomodcv <- BIOMOD_CrossValidation(bm.format = mybiomoddata,
+                                           k = 5,
+                                           do.stratification = FALSE,
+                                           nb.rep = 5,
+                                           do.full.models = TRUE)
+
+
+
+##Tuning the model 
+
+
+time.seq <- system.time(
+  bm.tuning <- BIOMOD_Tuning(bm.format = mybiomoddata, ME.env = myExpl, ME.n.bg = ncell(myExpl), models = c('RF','GBM','ANN','GLM'))
+)
+
+mybiomodoptions <- bm.tuning$models.options
+
+
+
+#model   
+
+myBiomodModelOut <- BIOMOD_Modeling(
+  mybiomoddata,
+  models = c('RF','ANN','GBM','GLM'),
+  bm.options = mybiomodoptions ,
+  nb.rep= 3,
+  data.split.table = mybiomodcv, 
+  data.split.perc= 70,
+  prevalence= 0.5,
+  metric.eval = c('ROC','TSS'),
+  var.import = 10)
+
+gc()
+
+# Get evaluation scores & variables importance
+get_evaluations(myBiomodModelOut)
+get_variables_importance(myBiomodModelOut)
+
+# Represent evaluation scores & variables importance
+bm_PlotEvalMean(bm.out = myBiomodModelOut,  dataset = "calibration")
+bm_PlotEvalMean(bm.out = myBiomodModelOut,  dataset = "validation")
+
+bm_PlotEvalBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'algo'), dataset = "validation")
+bm_PlotEvalBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'algo'), dataset = "calibration")
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('expl.var', 'algo', 'algo'))
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('expl.var', 'algo', 'run'))
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'expl.var', 'run'))
+
+
+bm_PlotResponseCurves(bm.out = myBiomodModelOut, 
+                      models.chosen = 'all',
+                      fixed.var = 'mean')
+
+# Get evaluation scores & variables importance
+myEval <- get_evaluations(myBiomodModelOut)
+myEval$CV.strategy <- "Random"
+head(myEval)
+boxplot(myEval$calibration ~ interaction(myEval$algo, myEval$CV.strategy),
+        xlab = "", ylab = "ROC AUC", col = rep(c("brown", "cadetblue"), 3))
+boxplot(myEval$validation ~ interaction(myEval$algo, myEval$CV.strategy),
+        xlab = "", ylab = "ROC AUC", col = rep(c("brown", "cadetblue"), 3))
+
+
+#ensemble
+codEnsemblemodel<-BIOMOD_EnsembleModeling(bm.mod = myBiomodModelOut,
+                                          models.chosen ='all',
+                                          em.by = 'all',
+                                          metric.select = c('TSS'),
+                                          metric.select.thresh = c(0.7),
+                                          var.import = 10,
+                                          metric.eval = c('TSS', 'ROC'),
+                                          em.algo = c('EMwmean','EMca','EMcv'),
+                                          EMci.alpha = 0.05,
+                                          EMwmean.decay = 'proportional')
+
+#ensemble model eval
+codensemblemodelscores <- get_evaluations(codEnsemblemodel)
+get_variables_importance(codEnsemblemodel)
+bm_PlotEvalMean(bm.out = codEnsemblemodel, group.by = 'full.name')
+bm_PlotEvalBoxplot(bm.out = codEnsemblemodel, group.by = c('full.name', 'full.name'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('expl.var', 'full.name', 'full.name'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('expl.var', 'algo', 'merged.by.run'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('algo', 'expl.var', 'merged.by.run'))
+
+
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = 'C.codringtonii_EMwmeanByTSS_mergedData_mergedRun_mergedAlgo',
+                      fixed.var = 'mean')
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = 'C.parnassia_EMcaByTSS_mergedData_mergedRun_mergedAlgo',
+                      fixed.var = 'mean')
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = 'C.codringtonii_EMcvByTSS_mergedData_mergedRun_mergedAlgo',
+                      fixed.var = 'mean')
+
+
+
+#Evaluate models with Boyce index and MPA
+mybiomodpo<- BIOMOD_PresenceOnly(
+  bm.mod = myBiomodModelOut,
+  bm.em = codEnsemblemodel,
+  bg.env = greece,
+  perc = 0.9,
+  save.output = TRUE
+)
+
+mybiomodpo
+
+
+
+
+#projection
+##current
+myBiomodProj <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                  proj.name = 'Current',
+                                  new.env = greece,
+                                  models.chosen = 'all',
+                                  metric.binary = 'all',
+                                  metric.filter = 'all',
+                                  build.clamping.mask = TRUE)
+
+Cod_ensemble_models_proj_current <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel, 
+                                                               proj.name = "current",
+                                                               new.env = greece,
+                                                               models.chosen = 'all',
+                                                               metric.binary = 'all',
+                                                               metric.filter = 'all')
+
+plot(myBiomodProj$C.helenae_PA10_allRun_RF)
+plot(Cod_ensemble_models_proj_current)
+
+##future projections
+#2040ssp1
+
+Projection_2040_1 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = 'Current',
+                                       new.env = greece_2040_1,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+
+
+Cod_ensemble_models_new_env_2040_1 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2040_1',
+                                                                 new.env = greece_2040_1,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = c('TSS','ROC'),
+                                                                 metric.filter = c('TSS','ROC'))
+
+
+
+plot(Projection_2040_1)
+plot(Cod_ensemble_models_new_env_2040_1)
+
+
+#2040ssp5
+
+Projection_2040_5 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = '2040_5',
+                                       new.env = greece_2040_5,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+
+Cod_ensemble_models_new_env_2040_5 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2040_5',
+                                                                 new.env = greece_2040_5,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2040_5)
+plot(Cod_ensemble_models_new_env_2040_5)
+
+
+
+
+#2100ssp1
+Projection_2100_1 <-BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                      proj.name = '2100_1',
+                                      new.env = greece_2100_1,
+                                      models.chosen = 'all',
+                                      metric.binary = 'all',
+                                      metric.filter = 'all',
+                                      build.clamping.mask = TRUE)
+
+Cod_ensemble_models_new_env_2100_1 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2100_1',
+                                                                 new.env = greece_2100_1,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2100_1)
+plot(Cod_ensemble_models_new_env_2100_1)
+
+#2100ssp5
+Projection_2100_5 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = '2100_5',
+                                       new.env = greece_2100_5,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+Cod_ensemble_models_new_env_2100_5 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2100_5',
+                                                                 new.env = greece_2100_5,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2100_5)
+plot(Cod_ensemble_models_new_env_2100_5)
+
+
+
+
+
+
+
+
+#Range size
+CurrentProj <- get_predictions(Cod_ensemble_models_proj_current,
+                               metric.binary = "TSS",
+                               model.as.col = TRUE)
+FutureProj <- get_predictions(Cod_ensemble_models_new_env_2100_1,
+                              metric.binary = "TSS",
+                              model.as.col = TRUE)
+
+
+
+
+myBiomodRangeSize <- BIOMOD_RangeSize(proj.current = CurrentProj, proj.future = FutureProj)
+
+myBiomodRangeSize$Compt.By.Models
+plot(myBiomodRangeSize$Diff.By.Pixel)
+
+
+bm_PlotRangeSize(bm.range = myBiomodRangeSize)
+
+
+
+
+## get cv evaluations
+eval <- get_evaluations(myBiomodModelOut)
+
+eval$strat <- NA
+eval$strat[grepl("13",eval$Model.name)] <- "Full"
+eval$strat[!(grepl("11",eval$Model.name)|
+               grepl("12",eval$Model.name)|
+               grepl("13",eval$Model.name))] <- "Random"
+eval$strat[grepl("11",eval$Model.name)|grepl("12",eval$Model.name)] <- "Strat"
+
+boxplot(eval$Testing.data~ eval$strat, ylab="ROC AUC")
+
+
+
+
+
+
+
+
+
+prec2040_5<-raster("2040/SSP5/wc2.1_2.5m_prec_EC-Earth3-Veg_ssp585_2021-2040.tif") 
+bio3_2040_5<- raster("2040/SSP5/bio3.tif")
+bio9_2040_5<- raster("2040/SSP5/bio9.tif")
+bio12_2040_5<- raster("2040/SSP5/bio12.tif")
+bio13_2040_5<- raster("2040/SSP5/bio13.tif")
+bio18_2040_5<- raster("2040/SSP5/bio18.tif")
+bio19_2040_5<- raster("2040/SSP5/bio19.tif")
+greece_2040_5<- stack(prec2040_5,bio3_2040_5,bio9_2040_5,bio12_2040_5,bio13_2040_5,bio18_2040_5,bio19_2040_5)
+greece_2040_5<- crop(greece_2040_5, e.in)
+greece_2040_5<- stack(greece_2040_5)
+
+
+
+
+
+
+#2100
+prec2100_1<-raster("2100/SSP1/wc2.1_2.5m_prec_EC-Earth3-Veg_ssp126_2081-2100.tif") 
+bio3_2100_1<- raster("2100/SSP1/bio3.tif")
+bio9_2100_1<- raster("2100/SSP1/bio9.tif")
+bio12_2100_1<- raster("2100/SSP1/bio12.tif")
+bio13_2100_1<- raster("2100/SSP1/bio13.tif")
+bio18_2100_1<- raster("2100/SSP1/bio18.tif")
+bio19_2100_1<- raster("2100/SSP1/bio19.tif")
+greece_2100_1<- stack(prec2100_1,bio3_2100_1,bio9_2100_1,bio12_2100_1,bio13_2100_1,bio18_2100_1,bio19_2100_1)
+greece_2100_1<- crop(greece_2100_1, e.in)
+greece_2100_1<- stack(greece_2100_1)
+
+
+
+
+
+
+
+
+prec2100_5<-raster("2100/SSP5/wc2.1_2.5m_prec_EC-Earth3-Veg_ssp585_2081-2100.tif") 
+bio3_2100_5<- raster("2100/SSP5/bio3.tif")
+bio9_2100_5<- raster("2100/SSP5/bio9.tif")
+bio12_2100_5<- raster("2100/SSP5/bio12.tif")
+bio13_2100_5<- raster("2100/SSP5/bio13.tif")
+bio18_2100_5<- raster("2100/SSP5/bio18.tif")
+bio19_2100_5<- raster("2100/SSP5/bio19.tif")
+greece_2100_5<- stack(prec2100_5,bio3_2100_5,bio9_2100_5,bio12_2100_5,bio13_2100_5,bio18_2100_5,bio19_2100_5)
+greece_2100_5<- crop(greece_2100_5, e.in)
+greece_2100_5<- stack(greece_2100_5)
+
+
+
+
+
+prec2100_5<-raster("2100/SSP5/wc2.1_2.5m_prec_EC-Earth3-Veg_ssp585_2081-2100.tif") 
+bio3_2100_5<- raster("2100/SSP5/bio3.tif")
+bio9_2100_5<- raster("2100/SSP5/bio9.tif")
+bio12_2100_5<- raster("2100/SSP5/bio12.tif")
+bio13_2100_5<- raster("2100/SSP5/bio13.tif")
+bio18_2100_5<- raster("2100/SSP5/bio18.tif")
+bio19_2100_5<- raster("2100/SSP5/bio19.tif")
+greece_2100_5<- stack(prec2100_5,bio3_2100_5,bio9_2100_5,bio12_2100_5,bio13_2100_5,bio18_2100_5,bio19_2100_5)
+greece_2100_5<- crop(greece_2100_5, e.in)
+greece_2100_5<- stack(greece_2100_5)
+
+#formatting data
+#name
+myRespName<- 'C.eucineta'
+myResp<- as.numeric(unlist(occ_euc[myRespName]))
+#coordinates
+myRespXY<- occ_euc[c("x","y")]
+
+
+
+mybiomoddata<-  BIOMOD_FormatingData(
+  myRespName,
+  myResp,
+  greece,
+  dir.name = ".",
+  myRespXY,
+  eval.resp.var = NULL,
+  eval.expl.var = NULL,
+  eval.resp.xy = NULL,
+  PA.nb.rep = 10,
+  PA.nb.absences = 100,
+  PA.strategy = "random",
+  PA.dist.min = 0,
+  PA.dist.max = NULL,
+  PA.sre.quant = 0,
+  PA.user.table = NULL,
+  na.rm = TRUE,
+  filter.raster = TRUE
+)
+
+#cross validation
+
+
+mybiomodcv <- BIOMOD_CrossValidation(bm.format = mybiomoddata,
+                                           k = 5,
+                                           do.stratification = FALSE,
+                                           nb.rep = 5,
+                                           do.full.models = TRUE)
+
+
+
+##Tuning the model 
+
+
+time.seq <- system.time(
+  bm.tuning <- BIOMOD_Tuning(bm.format = mybiomoddata, ME.env = myExpl, ME.n.bg = ncell(myExpl), models = c('RF','GBM','ANN','GLM'))
+)
+
+mybiomodoptions <- bm.tuning$models.options
+
+
+
+#model   
+
+myBiomodModelOut <- BIOMOD_Modeling(
+  mybiomoddata,
+  models = c('RF','ANN','GBM','GLM'),
+  bm.options = mybiomodoptions ,
+  nb.rep= 3,
+  data.split.table = mybiomodcv, 
+  data.split.perc= 70,
+  prevalence= 0.5,
+  metric.eval = c('ROC','TSS'),
+  var.import = 10)
+
+# Get evaluation scores & variables importance
+get_evaluations(myBiomodModelOut)
+get_variables_importance(myBiomodModelOut)
+
+# Represent evaluation scores & variables importance
+bm_PlotEvalMean(bm.out = myBiomodModelOut,  dataset = "calibration")
+bm_PlotEvalMean(bm.out = myBiomodModelOut,  dataset = "validation")
+
+bm_PlotEvalBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'algo'), dataset = "validation")
+bm_PlotEvalBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'algo'), dataset = "calibration")
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('expl.var', 'algo', 'algo'))
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('expl.var', 'algo', 'run'))
+bm_PlotVarImpBoxplot(bm.out = myBiomodModelOut, group.by = c('algo', 'expl.var', 'run'))
+
+
+bm_PlotResponseCurves(bm.out = myBiomodModelOut, 
+                      models.chosen = get_built_models(myBiomodModelOut)[c(1:3, 12:14)],
+                      fixed.var = 'median')
+
+# Get evaluation scores & variables importance
+myEval <- get_evaluations(myBiomodModelOut)
+myEval$CV.strategy <- "Random"
+head(myEval)
+boxplot(myEval$calibration ~ interaction(myEval$algo, myEval$CV.strategy),
+        xlab = "", ylab = "ROC AUC", col = rep(c("brown", "cadetblue"), 3))
+boxplot(myEval$validation ~ interaction(myEval$algo, myEval$CV.strategy),
+        xlab = "", ylab = "ROC AUC", col = rep(c("brown", "cadetblue"), 3))
+
+
+#ensemble
+codEnsemblemodel<-BIOMOD_EnsembleModeling(bm.mod = myBiomodModelOut,
+                                          models.chosen ='all',
+                                          em.by = 'all',
+                                          metric.select = c('TSS'),
+                                          metric.select.thresh = c(0.7),
+                                          var.import = 10,
+                                          metric.eval = c('TSS', 'ROC'),
+                                          em.algo = c('EMwmean','EMca','EMcv'),
+                                          EMci.alpha = 0.05,
+                                          EMwmean.decay = 'proportional')
+
+#ensemble model eval
+codensemblemodelscores <- get_evaluations(codEnsemblemodel)
+get_variables_importance(codEnsemblemodel)
+bm_PlotEvalMean(bm.out = codEnsemblemodel, group.by = 'full.name')
+bm_PlotEvalBoxplot(bm.out = codEnsemblemodel, group.by = c('full.name', 'full.name'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('expl.var', 'full.name', 'full.name'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('expl.var', 'algo', 'merged.by.run'))
+bm_PlotVarImpBoxplot(bm.out = codEnsemblemodel, group.by = c('algo', 'expl.var', 'merged.by.run'))
+
+
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = get_built_models(codEnsemblemodel)[c(1, 6, 7)],
+                      fixed.var = 'median')
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = get_built_models(codEnsemblemodel)[c(1, 6, 7)],
+                      fixed.var = 'min')
+bm_PlotResponseCurves(bm.out = codEnsemblemodel, 
+                      models.chosen = get_built_models(codEnsemblemodel)[7],
+                      fixed.var = 'median',
+                      do.bivariate = TRUE)
+
+
+
+
+#Evaluate models with Boyce index and MPA
+mybiomodpo<- BIOMOD_PresenceOnly(
+  bm.mod = myBiomodModelOut,
+  bm.em = codEnsemblemodel,
+  bg.env = greece,
+  perc = 0.9,
+  save.output = TRUE
+)
+
+mybiomodpo
+
+
+
+
+#projection
+##current
+myBiomodProj <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                  proj.name = 'Current',
+                                  new.env = greece,
+                                  models.chosen = 'all',
+                                  metric.binary = 'all',
+                                  metric.filter = 'all',
+                                  build.clamping.mask = TRUE)
+
+Cod_ensemble_models_proj_current <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel, 
+                                                               proj.name = "current",
+                                                               new.env = greece,
+                                                               models.chosen = 'all',
+                                                               metric.binary = 'all',
+                                                               metric.filter = 'all')
+
+plot(myBiomodProj$C.helenae_PA10_allRun_RF)
+plot(Cod_ensemble_models_proj_current)
+
+##future projections
+#2040ssp1
+
+Projection_2040_1 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = 'Current',
+                                       new.env = greece_2040_1,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+
+
+Cod_ensemble_models_new_env_2040_1 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2040_1',
+                                                                 new.env = greece_2040_1,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = c('TSS','ROC'),
+                                                                 metric.filter = c('TSS','ROC'))
+
+
+
+plot(Projection_2040_1, str.grep = "RF")
+plot(Cod_ensemble_models_new_env_2040_1)
+
+
+#2040ssp5
+
+Projection_2040_5 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = '2040_5',
+                                       new.env = greece_2040_5,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+
+Cod_ensemble_models_new_env_2040_5 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2040_5',
+                                                                 new.env = greece_2040_5,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2040_5, str.grep = "RF")
+plot(Cod_ensemble_models_new_env_2040_5)
+
+
+
+
+#2100ssp1
+Projection_2100_1 <-BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                      proj.name = '2100_1',
+                                      new.env = greece_2100_1,
+                                      models.chosen = 'all',
+                                      metric.binary = 'all',
+                                      metric.filter = 'all',
+                                      build.clamping.mask = TRUE)
+
+Cod_ensemble_models_new_env_2100_1 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2100_1',
+                                                                 new.env = greece_2100_1,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2100_1, str.grep = "RF")
+plot(Cod_ensemble_models_new_env_2100_1)
+
+#2100ssp5
+Projection_2100_5 <- BIOMOD_Projection(bm.mod = myBiomodModelOut,
+                                       proj.name = '2100_5',
+                                       new.env = greece_2100_5,
+                                       models.chosen = 'all',
+                                       metric.binary = 'all',
+                                       metric.filter = 'all',
+                                       build.clamping.mask = TRUE)
+Cod_ensemble_models_new_env_2100_5 <- BIOMOD_EnsembleForecasting(bm.em = codEnsemblemodel,
+                                                                 proj.name = '2100_5',
+                                                                 new.env = greece_2100_5,
+                                                                 models.chosen = 'all',
+                                                                 metric.binary = 'all',
+                                                                 metric.filter = 'all')
+
+
+
+plot(Projection_2100_5, str.grep = "RF")
+plot(Cod_ensemble_models_new_env_2100_5)
+
+
+
+
+
+
+
+
+#Range size
+CurrentProj <- get_predictions(Cod_ensemble_models_proj_current,
+                               metric.binary = "TSS",
+                               model.as.col = TRUE)
+FutureProj <- get_predictions(Cod_ensemble_models_new_env_2100_1,
+                              metric.binary = "TSS",
+                              model.as.col = TRUE)
+
+
+
+
+myBiomodRangeSize <- BIOMOD_RangeSize(proj.current = CurrentProj, proj.future = FutureProj)
+
+myBiomodRangeSize$Compt.By.Models
+plot(myBiomodRangeSize$Diff.By.Pixel)
+
+
+bm_PlotRangeSize(bm.range = myBiomodRangeSize)
+
+
+
+
+
+
+
